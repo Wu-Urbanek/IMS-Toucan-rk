@@ -9,7 +9,7 @@ from Utility.corpus_preparation import prepare_tts_corpus
 from Utility.storage_config import MODEL_DIR
 from Utility.storage_config import PREPROCESSING_DIR
 
-def run(gpu_id, resume_checkpoint, finetune, model_save_dir, cache_dir, local_dataset):
+def run(gpu_id, resume_checkpoint, finetune, model_save_dir, cache_dir, local_dataset, **kwargs):
     """
     Rukai TTS Finetuning Recipe
     """
