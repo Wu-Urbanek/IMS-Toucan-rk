@@ -20,6 +20,7 @@ from Recipes.ToucanTTS_Massive_stage3 import run as stage3
 from Recipes.ToucanTTS_Nancy import run as nancy
 from Recipes.finetuning_example_multilingual import run as fine_tuning_example_multilingual
 from Recipes.finetuning_example_simple import run as fine_tuning_example_simple
+from Recipes.finetuning_rukai import run as rukai
 
 pipeline_dict = {
     # the finetuning examples
@@ -41,7 +42,8 @@ pipeline_dict = {
     # vocoder training (not recommended, best to use provided checkpoint)
     "hifigan"                        : HiFiGAN,
     "e2e"  : e2e,
-    "be2e" : be2e
+    "be2e" : be2e,
+    "rukai": rukai
 }
 
 if __name__ == '__main__':
