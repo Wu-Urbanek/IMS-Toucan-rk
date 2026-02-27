@@ -2,9 +2,10 @@ import os
 import torch
 from Modules.ToucanTTS.ToucanTTS import ToucanTTS
 from Modules.ToucanTTS.toucantts_train_loop_arbiter import train_loop
-from Utility.corpus_preparation import prepare_tts_corpus
 from Utility.path_to_transcript_dicts import build_path_to_transcript_rukai
-from Utility.storage_config import MODELS_DIR, PREPROCESSING_DIR
+from Utility.corpus_preparation import prepare_tts_corpus
+from Utility.storage_config import MODEL_DIR
+from Utility.storage_config import PREPROCESSING_DIR
 
 def run(gpu_id, resume_checkpoint, finetune, model_save_dir, cache_dir, local_dataset):
     """
