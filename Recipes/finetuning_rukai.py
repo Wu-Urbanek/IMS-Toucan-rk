@@ -31,10 +31,12 @@ def run(gpu_id="cpu",
     # 3) 準備語料
     print("Preparing Rukai Corpus...")
     train_set, valid_set, device = prepare_tts_corpus(
-        path_to_transcript_dict=build_path_to_transcript_rukai(),
-        corpus_id="rukai_corpus",
+        transcript_dict = build_path_to_transcript_rukai(),
+        corpus_dir=cache_dir, 
         lang="dru",
-        save_dir=cache_dir
+        fine_tune_aligner=False,   # sanity check 先關
+        gpu_count=gpu_count,
+        rank=0
     )
 
     # 4) checkpoint 決策
