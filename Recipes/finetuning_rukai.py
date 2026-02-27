@@ -1,53 +1,65 @@
 import os
-import torch
 from huggingface_hub import hf_hub_download
-from torch.utils.data import ConcatDataset
+
 from Modules.ToucanTTS.ToucanTTS import ToucanTTS
 from Modules.ToucanTTS.toucantts_train_loop_arbiter import train_loop
 from Utility.path_to_transcript_dicts import build_path_to_transcript_rukai
 from Utility.corpus_preparation import prepare_tts_corpus
-from Utility.storage_config import MODEL_DIR
-from Utility.storage_config import PREPROCESSING_DIR
 
-def run(gpu_id, resume_checkpoint, finetune, model_save_dir, cache_dir, local_dataset, **kwargs):
+def run(gpu_id="cpu",
+        resume_checkpoint=None,
+        resume=False,
+        finetune=False,
+        model_dir=None,
+        use_wandb=False,
+        wandb_resume_id=None,
+        gpu_count=1,
+        **kwargs):
     """
     Rukai TTS Finetuning Recipe
     """
-    # 1. 設定路徑 (這些路徑會對應到你的 Modal Volume)
-    if model_save_dir is None:
-        model_save_dir = "/data/rukai_test/models/rukai_v1"
-    if cache_dir is None:
-        cache_dir = "/data/rukai_test/cache/rukai_v1"
-        
-    os.makedirs(model_save_dir, exist_ok=True)
+
+    # 1) save dir: 對接 run_training_pipeline.py 的 --model_save_dir -> model_dir
+    if model_dir is None:
+        model_dir = "/data/rukai_test/models/rukai_v1"
+    os.makedirs(model_dir, exist_ok=True)
+
+    # 2) cache / preprocessing dir（你自己定義）
+    cache_dir = "/data/rukai_test/cache/rukai_v1"
     os.makedirs(cache_dir, exist_ok=True)
 
-    # 2. 準備語料 (這會自動呼叫你寫的 build_path_to_transcript_rukai)
-    # 並執行特徵提取與對齊
+    # 3) 準備語料
     print("Preparing Rukai Corpus...")
     train_set, valid_set, device = prepare_tts_corpus(
         path_to_transcript_dict=build_path_to_transcript_rukai(),
         corpus_id="rukai_corpus",
-        lang="dru",  # 魯凱語 ISO 639-3 代碼
+        lang="dru",
         save_dir=cache_dir
     )
 
-    # 3. 初始化模型
-    # 我們選擇使用 ToucanTTS 架構
+    # 4) checkpoint 決策
+    if resume_checkpoint is None and not resume:
+        resume_checkpoint = hf_hub_download(
+            repo_id="Flux9665/ToucanTTS",
+            filename="ToucanTTS.pt"
+        )
+
     model = ToucanTTS()
 
-    # 4. 啟動訓練迴圈
-    # 因為是 25 句的 Sanity Check，我們設定較小的 batch size 並從預訓練模型開始
-    train_loop(net=model,
-               train_dataset=train_set,
-               valid_dataset=valid_set,
-               device=device,
-               save_directory=model_save_dir,
-               batch_size=8,  # 小規模資料建議 batch 小一點
-               eval_lang="dru",
-               warmup_steps=500,
-               steps=2000,     # 先跑 2000 步看成果
-               lr=0.0001,
-               resume_checkpoint=hf_hub_download(repo_id="Flux9665/ToucanTTS", filename="ToucanTTS.pt"),
-               use_wandb=False, # 先關掉 wandb 以免沒設定 key 報錯
-               finetune=finetune)
+    train_loop(
+        net=model,
+        train_dataset=train_set,
+        valid_dataset=valid_set,
+        device=device,
+        save_directory=model_dir,
+        batch_size=8,
+        eval_lang="dru",
+        warmup_steps=500,
+        steps=2000,
+        lr=0.0001,
+        resume_checkpoint=resume_checkpoint,
+        use_wandb=use_wandb,
+        wandb_resume_id=wandb_resume_id,
+        finetune=finetune,
+        gpu_count=gpu_count
+    )
