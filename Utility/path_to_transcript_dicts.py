@@ -6,7 +6,6 @@ import xml.etree.ElementTree as ET
 from csv import DictReader
 from pathlib import Path
 
-
 # HELPER FUNCTIONS
 
 def split_dictionary_into_chunks(input_dict, split_n):
@@ -82,6 +81,28 @@ def indic_voices_template(root, lang):
         path = f"{root}/{lang}/{lang}/wavs/{transcript['filepath']}"
         norm_text = transcript["normalized"]
         path_to_transcript[path] = norm_text
+    return path_to_transcript
+
+# RUKAI (FORMOSIAN)
+def build_path_to_transcript_rukai():
+    """Reading rukai wav files and metadata
+
+    Returns:
+        path_to_transcript (dict): key is the wav path, and the value is the text.  
+    """
+    import os
+    path_to_transcript = dict()
+    # the metadata path on modal sandbox
+    metadata_path = "/data/rukai_test/metadata.csv"
+    wav_dir = "/data/rukai_test/wavs"
+    
+    with open(metadata_path, "r", encoding="utf8") as f:
+        for line in f:
+            parts = line.strip().split("|")
+            if len(parts) == 2:
+                wav_id, text = parts
+                full_wav_path = os.path.join(wav_dir, f"{wav_id}.wav")
+                path_to_transcript[full_wav_path] = text.strip().replace("  "," ").lower()
     return path_to_transcript
 
 
