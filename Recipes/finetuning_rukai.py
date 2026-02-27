@@ -1,5 +1,7 @@
 import os
 import torch
+from huggingface_hub import hf_hub_download
+from torch.utils.data import ConcatDataset
 from Modules.ToucanTTS.ToucanTTS import ToucanTTS
 from Modules.ToucanTTS.toucantts_train_loop_arbiter import train_loop
 from Utility.path_to_transcript_dicts import build_path_to_transcript_rukai
@@ -46,6 +48,6 @@ def run(gpu_id, resume_checkpoint, finetune, model_save_dir, cache_dir, local_da
                warmup_steps=500,
                steps=2000,     # 先跑 2000 步看成果
                lr=0.0001,
-               resume_checkpoint=resume_checkpoint,
+               resume_checkpoint=hf_hub_download(repo_id="Flux9665/ToucanTTS", filename="ToucanTTS.pt"),
                use_wandb=False, # 先關掉 wandb 以免沒設定 key 報錯
                finetune=finetune)
