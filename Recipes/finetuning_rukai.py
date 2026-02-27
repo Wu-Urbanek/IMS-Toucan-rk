@@ -1,7 +1,7 @@
 import os
 import torch
-from TrainingInterfaces.TextToSpeech.ToucanTTS.ToucanTTS import ToucanTTS
-from TrainingInterfaces.TextToSpeech.ToucanTTS.toucan_tts_train_loop import train_loop
+from Modules.ToucanTTS.ToucanTTS import ToucanTTS
+from Modules.ToucanTTS.toucantts_train_loop_arbiter import train_loop
 from Utility.corpus_preparation import prepare_tts_corpus
 from Utility.path_to_transcript_dicts import build_path_to_transcript_rukai
 from Utility.storage_config import MODELS_DIR, PREPROCESSING_DIR
