@@ -1,6 +1,6 @@
 import os
 from huggingface_hub import hf_hub_download
-
+import torch
 from Modules.ToucanTTS.ToucanTTS import ToucanTTS
 from Modules.ToucanTTS.toucantts_train_loop_arbiter import train_loop
 from Utility.path_to_transcript_dicts import build_path_to_transcript_rukai
@@ -30,7 +30,7 @@ def run(gpu_id="cpu",
 
     # 3) 準備語料
     print("Preparing Rukai Corpus...")
-    train_set, valid_set, device = prepare_tts_corpus(
+    dataset = prepare_tts_corpus(
         transcript_dict = build_path_to_transcript_rukai(),
         corpus_dir=cache_dir, 
         lang="dru",
@@ -38,6 +38,18 @@ def run(gpu_id="cpu",
         gpu_count=gpu_count,
         rank=0
     )
+    # train_set, valid_set, device = prepare_tts_corpus(
+    #     transcript_dict = build_path_to_transcript_rukai(),
+    #     corpus_dir=cache_dir, 
+    #     lang="dru",
+    #     fine_tune_aligner=False,   # sanity check 先關
+    #     gpu_count=gpu_count,
+    #     rank=0
+    # )
+
+    train_set = dataset
+    valid_set = dataset
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 4) checkpoint 決策
     if resume_checkpoint is None and not resume:
