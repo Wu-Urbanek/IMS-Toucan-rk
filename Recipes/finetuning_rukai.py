@@ -6,15 +6,18 @@ from Modules.ToucanTTS.toucantts_train_loop_arbiter import train_loop
 from Utility.path_to_transcript_dicts import build_path_to_transcript_rukai
 from Utility.corpus_preparation import prepare_tts_corpus
 
-def run(gpu_id="cpu",
-        resume_checkpoint=None,
-        resume=False,
-        finetune=False,
-        model_dir=None,
-        use_wandb=False,
-        wandb_resume_id=None,
-        gpu_count=1,
-        **kwargs):
+
+def run(
+    gpu_id="cpu",
+    resume_checkpoint=None,
+    resume=False,
+    finetune=False,
+    model_dir=None,
+    use_wandb=False,
+    wandb_resume_id=None,
+    gpu_count=1,
+    **kwargs
+):
     """
     Rukai TTS Finetuning Recipe
     """
@@ -31,22 +34,22 @@ def run(gpu_id="cpu",
     # 3) 準備語料
     print("Preparing Rukai Corpus...")
     dataset = prepare_tts_corpus(
-        transcript_dict = build_path_to_transcript_rukai(),
-        corpus_dir=cache_dir, 
+        transcript_dict=build_path_to_transcript_rukai(),
+        corpus_dir=cache_dir,
         lang="dru",
-        fine_tune_aligner=False,   # sanity check 先關
+        fine_tune_aligner=False,  # sanity check 先關
         gpu_count=gpu_count,
-        rank=0
+        rank=0,
     )
     # train_set, valid_set, device = prepare_tts_corpus(
     #     transcript_dict = build_path_to_transcript_rukai(),
-    #     corpus_dir=cache_dir, 
+    #     corpus_dir=cache_dir,
     #     lang="dru",
     #     fine_tune_aligner=False,   # sanity check 先關
     #     gpu_count=gpu_count,
     #     rank=0
     # )
-
+    # for sanity check
     train_set = dataset
     valid_set = dataset
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -54,26 +57,27 @@ def run(gpu_id="cpu",
     # 4) checkpoint 決策
     if resume_checkpoint is None and not resume:
         resume_checkpoint = hf_hub_download(
-            repo_id="Flux9665/ToucanTTS",
-            filename="ToucanTTS.pt"
+            repo_id="Flux9665/ToucanTTS", filename="ToucanTTS.pt"
         )
 
     model = ToucanTTS()
+    datasets = [train_set]
+    train_samplers = [None]
 
     train_loop(
         net=model,
-        train_dataset=train_set,
-        valid_dataset=valid_set,
+        datasets=datasets,
+        train_samplers=train_samplers,
+        gpu_count=1,
         device=device,
         save_directory=model_dir,
+        path_to_checkpoint=resume_checkpoint,
+        lr=1e-4,
+        resume=resume,
+        warmup_steps=10,
+        use_wandb=use_wandb,
         batch_size=2,
         eval_lang="dru",
-        warmup_steps=10,
+        fine_tune=finetune,
         steps=100,
-        lr=1e-4,
-        resume_checkpoint=resume_checkpoint,
-        use_wandb=False,
-        wandb_resume_id=wandb_resume_id,
-        finetune=finetune,
-        gpu_count=gpu_count
     )
