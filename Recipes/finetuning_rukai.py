@@ -73,11 +73,11 @@ def run(
         save_directory=model_dir,
         path_to_checkpoint=resume_checkpoint,
         lr=1e-4,
-        resume=resume,
+        resume=False,
         warmup_steps=10,
         use_wandb=use_wandb,
         batch_size=2,
         eval_lang="dru",
-        fine_tune=finetune,
+        fine_tune=True,
         steps=100,
     )
