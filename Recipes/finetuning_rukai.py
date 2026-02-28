@@ -61,13 +61,11 @@ def run(
         )
 
     model = ToucanTTS()
-    datasets = [train_set]
-    train_samplers = [None]
 
     train_loop(
         net=model,
-        datasets=datasets,
-        train_samplers=train_samplers,
+        datasets=[train_set],
+        train_samplers=[torch.utils.data.RandomSampler(train_set)],
         gpu_count=1,
         device=device,
         save_directory=model_dir,
