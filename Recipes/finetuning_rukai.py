@@ -72,10 +72,10 @@ def run(
         path_to_checkpoint=resume_checkpoint,
         lr=1e-4,
         resume=False,
-        warmup_steps=10,
+        warmup_steps=12,
         use_wandb=use_wandb,
-        batch_size=2,
+        batch_size=3,
         eval_lang="dru",
         fine_tune=True,
-        steps=100,
+        steps=120,
     )

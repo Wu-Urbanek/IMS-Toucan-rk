@@ -584,6 +584,11 @@ class ArticulatoryCombinedTextFrontend:
             self.expand_abbreviations = lambda x: x
             self.phonemizer = "espeak"
 
+        elif language == "dru":
+            self.g2p_lang = "dru"  # Wutai Rukai (霧台魯凱語)
+            self.expand_abbreviations = lambda x: x
+            self.phonemizer = "rukai"
+
         else:
             # blanket solution for the rest
             print("Using Transphone. A specialized phonemizer might work better.")
@@ -646,6 +651,8 @@ class ArticulatoryCombinedTextFrontend:
             return "这是一个复杂的句子，它甚至包含一个停顿。"
         elif lang == "vie":
             return "Đây là một câu phức tạp, nó thậm chí còn chứa một khoảng dừng."
+        elif lang == "dru":
+            return "sabaw makanaelre"
         else:
             print(f"No example sentence specified for the language: {lang}\n "
                   f"Please specify an example sentence in the get_example_sentence function in Preprocessing/TextFrontend to track your progress.")
@@ -849,6 +856,34 @@ class ArticulatoryCombinedTextFrontend:
                     word_list.append(self.transphone.inference(word_by_whitespace, self.g2p_lang))
                 chunk_list.append(" ".join(["".join(word) for word in word_list]))
             phones = "~ ".join(chunk_list)
+        elif self.phonemizer == "rukai":
+            # Wutai Rukai (霧台魯凱語) rule-based G2P
+            # Orthography is nearly transparent: one letter = one sound
+            # Only digraph: ng → ŋ. All others are single-character mappings.
+            rukai_to_ipa = {
+                'a': 'a', 'b': 'b', 'c': 'ts', 'd': 'd', 'e': 'ə',
+                'g': 'ɡ', 'h': 'h', 'i': 'i', 'k': 'k', 'l': 'l',
+                'm': 'm', 'n': 'n', 'o': 'o', 'p': 'p', 'r': 'r',
+                's': 's', 't': 't', 'u': 'u', 'v': 'v', 'w': 'w',
+                'y': 'j', 'z': 'z',
+            }
+            phone_list = []
+            for word in utt.lower().split():
+                word_phones = []
+                i = 0
+                while i < len(word):
+                    if word[i] == 'n' and i + 1 < len(word) and word[i + 1] == 'g':
+                        word_phones.append('ŋ')
+                        i += 2
+                    elif word[i] in rukai_to_ipa:
+                        word_phones.append(rukai_to_ipa[word[i]])
+                        i += 1
+                    else:
+                        print(f"Rukai G2P: skipping unknown character '{word[i]}' in word '{word}'")
+                        i += 1
+                phone_list.append("".join(word_phones))
+            phones = " ".join(phone_list)
+
         elif self.phonemizer == "dragonmapper":
             phones = pinyin_to_ipa(utt)
 
