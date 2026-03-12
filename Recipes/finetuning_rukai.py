@@ -71,7 +71,7 @@ def run(
         save_directory=model_dir,
         path_to_checkpoint=resume_checkpoint,
         lr=1e-5,
-        resume=False,
+        resume=True,
         warmup_steps=500,
         use_wandb=use_wandb,
         batch_size=12,
