@@ -77,5 +77,5 @@ def run(
         batch_size=12,
         eval_lang="dru",
         fine_tune=True,
-        steps=5000,
+        steps=3000,
     )
